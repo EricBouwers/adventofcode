@@ -7,9 +7,9 @@ def cleanup(x):
     x = re.sub(r"<[^>]*>", "", x)    
     return x
 
-def dict_val(x, level_val):
+def list_val(x, level_val):
     result = level_val
-    result += sum(map(lambda y: dict_val(y, level_val+1), x))
+    result += sum(map(lambda y: list_val(y, level_val+1), x))
     return result
 
 def score(x):
@@ -17,8 +17,8 @@ def score(x):
     list_rep = re.sub(r"\[,*\]","[]",list_rep)
     list_rep = re.sub(r",\]","]",list_rep)
     list_rep = re.sub(r"\[,","[",list_rep)
-    d = ast.literal_eval(list_rep)
-    return dict_val(d, 1) 
+    l = ast.literal_eval(list_rep)
+    return list_val(l, 1) 
 
 def count_garbage(x):
     x = re.sub(r"\!.","", x)    
