@@ -66,12 +66,42 @@ def count_used(grid):
     return sum([sum(x) for x in grid])
 
 
+def pos_key(i,j):
+    return "{}_{}".format(i,j)
+
+
 def count_regions(grid):
+    seen = set()
+    groups = 0
+
+    for i in range(0, 128):
+        for j in range(0, 128):
+            if grid[i][j] == 1 and pos_key(i,j) not in seen:
+                add_nodes(grid, i, j, seen)
+                groups += 1
+    
+    return groups
+
+
+def add_nodes(grid, i, j, all_nodes):
+    if pos_key(i,j) not in all_nodes:
+        all_nodes.add(pos_key(i,j))
+
+        for newi, newj in attached(grid, i, j):
+            add_nodes(grid, newi, newj, all_nodes)
+
+
+def attached(grid, i, j):
+    return filter(None, [(i+1, j) if i < 127 and grid[i+1][j] == 1 else None 
+                        ,(i-1, j) if i > 0 and grid[i-1][j] == 1 else None      
+                        ,(i, j+1) if j < 127 and grid[i][j+1] == 1 else None           
+                        ,(i, j-1) if j > 0 and grid[i][j-1] == 1 else None])
 
 
 if __name__ == '__main__':
 
     grid = defrag("hwlqcszp")
     print count_used(grid)
+    print count_regions(grid)
 
 
