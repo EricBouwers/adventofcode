@@ -16,9 +16,9 @@ def process(x):
     height = len(grid)
     direction = (0, 1)
     result = ""
-    steps = 0
+    steps = 1
 
-    while direction and 0 <= pos[0] < width and 0 <= pos[1] < height and grid[pos[1]][pos[0]] != "F":
+    while 0 <= pos[0] < width and 0 <= pos[1] < height and grid[pos[1]][pos[0]] != "F":
         steps += 1
         if grid[pos[1]][pos[0]] != "+":
             pos[0] += direction[0]
@@ -41,7 +41,7 @@ def process(x):
         if grid[pos[1]][pos[0]] not in ["-", "|", "+", " "]:
             result += grid[pos[1]][pos[0]]
 
-    return result, steps + 1
+    return result, steps
 
 
 if __name__ == "__main__":
