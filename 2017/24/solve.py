@@ -13,30 +13,14 @@ def parse_comps(x):
     return components
 
 
-def get_value(comb):
-    result = 0
-    val = 0
-
-    for i, c in enumerate(comb):
-        if val in c:
-            result += sum(c)
-            val = sum(c) - val
-        elif i < len(comb):
-            return -1
-
-    return result 
-
-
-def next_paths(upto, pos, val):
+def next_paths(l, v, pos, val):
     result = []
 
     for x in [y for y in pos if val in y]:
-        tmp_upto = list(upto)
-        tmp_upto.append(x)
         tmp_pos = list(pos)
         tmp_pos.remove(x)
 
-        result.append((tmp_upto, tmp_pos, sum(x) - val))
+        result.append((l+1, v+sum(x), tmp_pos, sum(x) - val))
 
     return result
 
@@ -44,24 +28,22 @@ def next_paths(upto, pos, val):
 def process_one(x):
     comps = parse_comps(x)
     all_paths = []
-    prev_paths = [([], comps, 0)]
+    prev_paths = [(0, 0, comps, 0)]
     added = 1  
 
     while added > 0:
         new_paths = []
-        for upto, pos, val in prev_paths:
-            new_paths += next_paths(upto, pos, val)
+        for l, v, pos, val in prev_paths:
+            new_paths += next_paths(l, v, pos, val)
 
         added = len(new_paths)    
         all_paths += prev_paths
         prev_paths = new_paths
 
-    results = map(lambda y: (len(y[0]), get_value(y[0])), all_paths)
-    
-    strongest = max(map(lambda x: x[1], results))
+    strongest = max(map(lambda x: x[1], all_paths))
 
-    longest_length = max(map(lambda x: x[0], results))
-    strongest_longest = max(map(lambda y: y[1], filter(lambda x: x[0] == longest_length, results)))
+    longest_length = max(map(lambda x: x[0], all_paths))
+    strongest_longest = max(map(lambda y: y[1], filter(lambda x: x[0] == longest_length, all_paths)))
 
     return strongest, strongest_longest
 
