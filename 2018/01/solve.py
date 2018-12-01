@@ -1,23 +1,19 @@
 #!/usr/bin/env python
 
-import sys, operator
+import sys
 
 def recalibrate(freqs):
     return eval("0" + freqs.replace(", "," "))
 
 def recalibrate_twice(freqs):
-    freqs = freqs.split(", ")
+    freqs = [int(x) for x in freqs.split(", ")]
     len_freqs = len(freqs)
-
     current, index = (0,0)
     seen_freqs = set() 
 
     while current not in seen_freqs:
         seen_freqs.add(current)
-        freq = freqs[index]
-        op =  operator.add if freq[0] == "+" else operator.sub
-
-        current = op(current, int(freq[1:]))
+        current += freqs[index]
         index = (index + 1) % len_freqs
 
     return current
