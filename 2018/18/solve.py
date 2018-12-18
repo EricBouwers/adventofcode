@@ -90,5 +90,5 @@ if __name__ == '__main__':
     data = sys.argv[1]
 
     print part1(data,10)
-    print part1(data,1000)
+    print part1(data,1000000000)
 
