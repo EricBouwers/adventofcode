@@ -53,7 +53,7 @@ def part2(data):
         for x in xrange(min(xs), max(xs) + 1, drange):
             for y in xrange(min(ys), max(ys) + 1, drange):
                 for z in xrange(min(zs), max(zs) + 1, drange):
-                    inrange = sum([1 if (man_dist(b, (x,y,z)) - b[3]) / drange <= 0 else 0 for b in bots])
+                    inrange = sum([1 if (man_dist(b, (x,y,z)) - b[3]) < drange else 0 for b in bots])
                     if inrange > highest or (inrange == highest and man_dist((x,y,z), (0,0,0)) < closest):
                         highest = inrange
                         closest = [x,y,z]
