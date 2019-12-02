@@ -10,9 +10,27 @@ test_4 = "2,4,4,5,99,0"
 test_5 = "1,1,1,4,99,5,6,0,99"
 
 OPERATORS = {
-    1: add,
-    2: mul
+    1: lambda m, p: simple_ops(add, m, p),
+    2: lambda m, p: simple_ops(mul, m, p)
 }
+
+
+def simple_ops(op, mem, p):
+    mem[mem[p + 3]] = op(mem[mem[p + 1]], mem[mem[p + 2]])
+    p += 4
+    return mem, p
+
+
+def intcode_comp(memory):
+    pointer = 0
+    max_p = len(memory)
+    while pointer < max_p:
+        cur_val = memory[pointer]
+        if cur_val == 99:
+            return memory
+
+        op = OPERATORS[cur_val]
+        memory, pointer = op(memory, pointer)
 
 
 def part1(input_data, index, noun=None, verb=None):
@@ -24,16 +42,7 @@ def part1(input_data, index, noun=None, verb=None):
     if verb is not None:
         inputs[2] = verb
 
-    pointer = 0
-    max_p = len(inputs)
-    while pointer < max_p:
-        cur_val = inputs[pointer]
-        if cur_val == 99:
-            return inputs[index]
-
-        op = OPERATORS[cur_val]
-        inputs[inputs[pointer+3]] = op(inputs[inputs[pointer + 1]], inputs[inputs[pointer + 2]])
-        pointer += 4
+    return intcode_comp(inputs)[index]
 
 
 def part2(input_data, val):
