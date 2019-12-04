@@ -4,54 +4,56 @@ import sys, re
 
 
 def is_valid(password):
-    password = str(password)
     prev = None
     double = False
-    higher = True
-    for p in [int(x) for x in password]:
+    while password:
+        password, p = divmod(password, 10)
         double = double or p == prev
-        higher = higher and (prev is None or p >= prev)
-        prev = p
+        if prev is None or p <= prev:
+            prev = p
+        else:
+            return False
 
-    return double and higher
+    return double
 
 
 def is_valid2(password):
-    password = str(password)
     prev = None
-    higher = True
-    double_digits = []
-    for p in [int(x) for x in password]:
+    double_digits = set()
+    tmp = password
+    while tmp:
+        tmp, p = divmod(tmp, 10)
         if p == prev:
-            double_digits.append(p)
-        higher = higher and (prev is None or p >= prev)
-        prev = p
+            double_digits.add(str(p))
+        if prev is None or p <= prev:
+            prev = p
+        else:
+            return False
 
-    valid_double_digits = [x for x in double_digits if not re.findall(r'[' + str(x) + ']{3,}', password)]
+    str_password = str(password)
+    valid_double_digits = [x for x in double_digits if not re.findall("".join(3*[x]), str_password)]
 
-    return higher and len(valid_double_digits) > 0
+    return len(valid_double_digits) > 0
 
 
 def part1(data):
     r = [int(x) for x in data.split("-")]
 
-    all_passed = set()
+    all_passed = 0
     for r in range(r[0], r[1]):
-        if is_valid(r):
-            all_passed.add(r)
+        all_passed += 1 if is_valid(r) else 0
 
-    return len(all_passed)
+    return all_passed
 
 
 def part2(data):
     r = [int(x) for x in data.split("-")]
 
-    all_passed = set()
+    all_passed = 0
     for r in range(r[0], r[1]):
-        if is_valid2(r):
-            all_passed.add(r)
+        all_passed += 1 if is_valid2(r) else 0
 
-    return len(all_passed)
+    return all_passed
 
 
 if __name__ == '__main__':
