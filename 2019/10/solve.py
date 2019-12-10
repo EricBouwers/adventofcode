@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import math
-import sys
-from math import sqrt
+from collections import defaultdict
 
 test_1 = """.#..#
 .....
@@ -41,24 +40,16 @@ test_3 = """.#..##.###...#######
 
 
 def parse_astroids(data):
-    astroids = {}
+    astroids = []
     y = 0
     for d in data:
         x = 0
         for c in d:
-            astroids[x, y] = 1 if c == "#" else 0
+            if c == "#":
+                astroids.append((x, y))
             x += 1
         y += 1
     return astroids
-
-
-def distance(a, b):
-    return sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
-
-
-def is_between2(o, a, c):
-    epsilon = 0.00001
-    return -epsilon < (distance(a, o) + distance(o, c) - distance(a, c)) < epsilon
 
 
 def is_between(o, a, c):
@@ -85,28 +76,31 @@ def no_one_in_between(a, c, astroids):
 
 
 def part1(data):
-    astroid_map = parse_astroids(data)
-    astroids = [a for a in astroid_map if astroid_map[a] == 1]
-
+    astroids = parse_astroids(data)
     visibles = extract_visibles(astroids)
 
-    max_visible = max([len(x) for x in visibles.values()])
+    max_visible = 0
+    max_c = None
     for c, v in visibles.items():
-        if len(v) == max_visible:
-            return c, astroid_map, astroids, visibles
+        if len(v) > max_visible:
+            max_c = c
+            max_visible = len(v)
+
+    return max_c, astroids, visibles, max_visible
 
 
 def extract_visibles(astroids, interested_in=None):
     if interested_in is None:
         interested_in = astroids
 
-    visibles = {}
+    new_astroids = {x:x for x in astroids}
+    visibles = defaultdict(list)
     for a in interested_in:
-        visible = []
-        for c in astroids:
+        del new_astroids[a]
+        for c in new_astroids.keys():
             if a != c and no_one_in_between(a, c, astroids):
-                visible.append(c)
-        visibles[a] = visible
+                visibles[a].append(c)
+                visibles[c].append(a)
     return visibles
 
 
@@ -128,7 +122,7 @@ def calc_angle(station, x):
 
 
 def part2(data, up_to):
-    station, astriod_map, astroids, visibles = part1(data)
+    station, astroids, visibles, max_visible = part1(data)
     blasted_ones = []
 
     while len(blasted_ones) < up_to:
@@ -140,7 +134,6 @@ def part2(data, up_to):
         astroids = set(astroids) - set(newly_blasted)
         visibles = extract_visibles(astroids, [station])
 
-    print(blasted_ones)
     return blasted_ones[up_to-1][0] * 100 + blasted_ones[up_to-1][1]
 
 
@@ -156,6 +149,6 @@ if __name__ == '__main__':
     with open('input') as f:
         data = f.readlines()
 
-    print(part1(data)[0])
+    print(part1(data)[3])
     print(part2(data, 200))
 
