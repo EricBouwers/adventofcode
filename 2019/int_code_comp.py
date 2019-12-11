@@ -35,7 +35,7 @@ def set_val(mode_and_pointer, mem, p, args):
 
 def print_val(modes, mem, p):
     val = _get_mem_val(modes, mem, p, 0)
-    # print(val)
+    print(val)
     p += 2
     return mem, p, val
 
@@ -102,20 +102,20 @@ def _get_mem_val(mode_and_position, mem, p, i):
         return mem[mem[p + 1 + i]]
 
 
-def intcode_comp(memory, args, get_output=False, pointer=0):
-    new_memory = defaultdict(lambda: 0)
-    for i in range(len(memory)):
-        new_memory[i] = memory[i]
-    memory = new_memory
+def intcode_comp(memory, args, get_output=False, pointer=0, relative_pointer=0):
 
-    relative_pointer = 0
+    if not isinstance(memory, defaultdict):
+        new_memory = defaultdict(lambda: 0)
+        for i in range(len(memory)):
+            new_memory[i] = memory[i]
+        memory = new_memory
+
     while True:
-
         cur_val = memory[pointer]
         op_and_modes = parse_op_and_modes(cur_val)
 
         if op_and_modes[0] == 99:
-            return memory if not get_output else memory, pointer, None
+            return memory if not get_output else memory, pointer, None, relative_pointer
 
         op = OPERATORS[op_and_modes[0]]
         output = op([relative_pointer, op_and_modes[1:]], memory, pointer, args)
@@ -123,6 +123,6 @@ def intcode_comp(memory, args, get_output=False, pointer=0):
         if len(output) == 3 and op_and_modes[0] == 9:
             relative_pointer = output[2]
         elif len(output) == 3 and op_and_modes[0] == 4 and get_output:
-            return output
+            return output[0], output[1], output[2], relative_pointer
 
         memory, pointer = output[0], output[1]

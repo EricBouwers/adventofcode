@@ -34,7 +34,7 @@ def loop_over_comps(comps, signal):
     new_comps = []
     for memory, pointer, args in comps:
         args.append(signal)
-        memory, pointer, new_signal = int_code_comp.intcode_comp(memory, args, True, pointer)
+        memory, pointer, new_signal, _ = int_code_comp.intcode_comp(memory, args, True, pointer)
         new_comps.append((memory, pointer, args))
 
         if new_signal is not None:

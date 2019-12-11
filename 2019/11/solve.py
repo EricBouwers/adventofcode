@@ -11,9 +11,9 @@ test_3 = """"""
 test_4 = """"""
 
 DIRECTION_TO_STEPS = {
-    "^" : [(0, 1), "<", ">"],
+    "^": [(0, -1), "<", ">"],
     "<": [(-1, 0), "v", "^"],
-    "v": [(0, -1), ">", "<"],
+    "v": [(0, 1), ">", "<"],
     ">": [(1, 0), "^", "v"],
 }
 
@@ -21,6 +21,7 @@ DIRECTION_TO_STEPS = {
 def part1(data, starting_color=0):
     memory = [int(x) for x in data.split(",")]
     pointer = 0
+    relative_pointer = 0
 
     grid = defaultdict(lambda: 0)
     cur_pos = (0, 0)
@@ -30,8 +31,8 @@ def part1(data, starting_color=0):
     painted = set()
 
     while True:
-        memory, pointer, paint = intcode_comp(memory, [grid[cur_pos]], get_output=True, pointer=pointer)
-        memory, pointer, output = intcode_comp(memory, [grid[cur_pos]], get_output=True, pointer=pointer)
+        memory, pointer, paint, relative_pointer = intcode_comp(memory, [grid[cur_pos]], get_output=True, pointer=pointer, relative_pointer=relative_pointer)
+        memory, pointer, output, relative_pointer = intcode_comp(memory, [grid[cur_pos]], get_output=True, pointer=pointer, relative_pointer=relative_pointer)
 
         if paint is None or output is None:
             return len(painted), grid
@@ -46,23 +47,17 @@ def part1(data, starting_color=0):
 
 def part2(data):
     _, grid = part1(data, 1)
-    for y in range(10):
+    for y in range(0, 10):
         line = ""
-        for x in range(-100, 100):
+        for x in range(-50, 100):
             line += " " if grid[(x, y)] == 0 else "#"
         print(line)
 
 
 if __name__ == '__main__':
-
-    # assert part1(test_1) == None
-    # assert part1(test_2) == None
-    # assert part2(test_3) == None
-    # assert part2(test_4) == None
-
     with open('input') as f:
         data = f.readlines()
 
-    # print(part1(data[0])[0])
+    print(part1(data[0])[0])
     print(part2(data[0]))
 
