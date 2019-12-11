@@ -35,7 +35,7 @@ def set_val(mode_and_pointer, mem, p, args):
 
 def print_val(modes, mem, p):
     val = _get_mem_val(modes, mem, p, 0)
-    print(val)
+    # print(val)
     p += 2
     return mem, p, val
 
