@@ -46,7 +46,11 @@ def part1(data, starting_color=0):
 
 def part2(data):
     _, grid = part1(data, 1)
-    print(grid)
+    for y in range(10):
+        line = ""
+        for x in range(100):
+            line += " " if grid[(x, y)] == 0 else "#"
+        print(line)
 
 
 if __name__ == '__main__':
