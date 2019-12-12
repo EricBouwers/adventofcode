@@ -34,11 +34,11 @@ def part1(data, starting_color=0):
         memory, pointer, paint, relative_pointer = intcode_comp(memory, [grid[cur_pos]], get_output=True, pointer=pointer, relative_pointer=relative_pointer)
         memory, pointer, output, relative_pointer = intcode_comp(memory, [grid[cur_pos]], get_output=True, pointer=pointer, relative_pointer=relative_pointer)
 
-        if paint is None or output is None:
-            return len(painted), grid
-
         grid[cur_pos] = paint
         painted.add(cur_pos)
+
+        if paint is None or output is None:
+            return len(painted), grid
 
         facing = DIRECTION_TO_STEPS[facing][1+output]
         step = DIRECTION_TO_STEPS[facing][0]
