@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import datetime
-import sys
+import numpy as np
 from _operator import mul
 
 test_1 = """12345678"""
@@ -16,13 +16,14 @@ def get_pattern(i, length):
     if (i, length) not in PHASE_DICT:
         p = []
         pattern_numbers = [0, 1, 0, -1]
-        while length > -1:
+        count_length = length
+        while count_length > -1:
             pattern_number = pattern_numbers.pop(0)
             p += i * [pattern_number]
             pattern_numbers.append(pattern_number)
-            length -= i
+            count_length -= i
 
-        PHASE_DICT[(i, length)] = p[1:]
+        PHASE_DICT[(i, length)] = np.array(p[1:length+1])
 
     return PHASE_DICT[(i, length)]
 
@@ -38,11 +39,12 @@ def part1(data, phases):
 
 def run_fft_phases(len_signal, phases, signal):
 
+    signal = np.array(signal)
     while phases > 0:
         new_signal = []
         for i, x in enumerate(signal):
             new_signal.append(
-                abs(sum(map(lambda y: y[0] * y[1], zip(signal, get_pattern(i + 1, len_signal))))) % 10)
+                abs((signal * get_pattern(i + 1, len_signal)).sum()) % 10)
 
         signal = new_signal
         phases -= 1
@@ -76,6 +78,8 @@ if __name__ == '__main__':
     with open('input') as f:
         data = f.read()
 
+    print(datetime.datetime.now())
     print(part1(data, 100)[0:8])
+    print(datetime.datetime.now())
     print(part2(data))
-
+    print(datetime.datetime.now())
