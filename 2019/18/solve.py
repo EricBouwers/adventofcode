@@ -20,11 +20,11 @@ test_3 = """#################
 #l.F..d...h..C.m#
 #################"""
 test_4 = """#######
-#..#Cd#
+#a.#Cd#
 ##...##
 ##.@.##
 ##...##
-#cB#.b#
+#cB#Ab#
 #######"""
 test_5 = """###############
 #d.ABC.#.....a#
@@ -85,14 +85,14 @@ def print_state(pos, keys):
 def part1(data):
     world, keys, me = parse_world(data)
 
-    moves = [(0, me, set(), [])]
+    moves = [(0, me, set())]
     seen_states = set(print_state(me, set()))
 
     while len(moves) > 0:
-        steps, cur_pos, my_keys, my_moves = moves.pop(0)
+        steps, cur_pos, my_keys = moves.pop(0)
 
         if len(keys.keys() - my_keys) == 0:
-            return len(my_moves), my_keys
+            return steps, my_keys
         else:
             for s in STEPS:
                 new_pos = take_step(cur_pos, s, world, my_keys)
@@ -104,9 +104,7 @@ def part1(data):
 
                     state_key = print_state(new_pos, new_keys)
                     if state_key not in seen_states:
-                        new_moves = [m for m in my_moves]
-                        new_moves.append(new_pos)
-                        moves.append((steps+1, new_pos, new_keys, new_moves))
+                        moves.append((steps+1, new_pos, new_keys))
 
                     seen_states.add(state_key)
 
@@ -114,7 +112,48 @@ def part1(data):
 
 
 def part2(data):
-    return None
+    world, keys, me = parse_world(data)
+
+    world[me] = "#"
+    world[(me[0]-1, me[1])] = "#"
+    world[(me[0]+1, me[1])] = "#"
+    world[(me[0], me[1]-1)] = "#"
+    world[(me[0], me[1]+1)] = "#"
+
+    world[(me[0]-1, me[1]-1)] = "@"
+    world[(me[0]+1, me[1]+1)] = "@"
+    world[(me[0]-1, me[1]+1)] = "@"
+    world[(me[0]+1, me[1]-1)] = "@"
+
+    all_mes = [(me[0]-1, me[1]-1), (me[0]+1, me[1]+1), (me[0]+1, me[1]-1), (me[0]-1, me[1]+1)]
+
+    moves = [(0, all_mes, set())]
+    seen_states = set(print_state(all_mes, set()))
+
+    while len(moves) > 0:
+        steps, cur_positions, my_keys = moves.pop(0)
+
+        if len(keys.keys() - my_keys) == 0:
+            return steps
+        else:
+            for i, cur_pos in enumerate(cur_positions):
+                for s in STEPS:
+                    new_pos = take_step(cur_pos, s, world, my_keys)
+                    new_keys = my_keys
+                    if new_pos is not None:
+                        if world[new_pos].islower():
+                            new_keys = set([k for k in my_keys])
+                            new_keys.add(world[new_pos])
+
+                        new_positions = [n for n in cur_positions]
+                        new_positions[i] = new_pos
+                        state_key = print_state(new_pos, new_keys)
+                        if state_key not in seen_states:
+                            moves.append((steps+1, new_positions, new_keys))
+
+                        seen_states.add(state_key)
+
+    return -1, my_keys
 
 
 if __name__ == '__main__':
@@ -122,8 +161,8 @@ if __name__ == '__main__':
     assert part1(test_1)[0] == 8
     assert part1(test_2)[0] == 86
     assert part1(test_3)[0] == 136
-    # assert part2(test_4) == 8
-    # assert part2(test_5) == 24
+    assert part2(test_4) == 8
+    assert part2(test_5) == 24
     # assert part2(test_6) == 72
 
     print('done testing')
