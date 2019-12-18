@@ -153,8 +153,6 @@ def part2(data):
 
                         seen_states.add(state_key)
 
-    return -1, my_keys
-
 
 if __name__ == '__main__':
 
