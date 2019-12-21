@@ -10,38 +10,18 @@ test_3 = """"""
 test_4 = """"""
 
 
-def run_line(memory, pointer, relative_pointer, args):
-    output = ""
-    s = 0
-    while s != 10:
-        memory, pointer, s, relative_pointer = intcode_comp(memory, args, True, pointer, relative_pointer)
-        if s > 1000:
-            return s, memory, pointer, relative_pointer
-        output += str(chr(s))
-
-    return output, memory, pointer, relative_pointer
-
-
-def parse_world(data, args, stepping="Walking...\n"):
+def run_acsii_program(data, main):
     memory = [int(x) for x in data.split(",")]
     pointer = 0
     relative_pointer = 0
     finished = False
-    world = {}
+    output = {}
     cur_pos = (0, 0)
 
-    output, memory, pointer, relative_pointer = run_line(memory, pointer, relative_pointer, [])
+    args = [ord(c) for c in main]
+    max_x = 0
 
-    output = stepping
-    while output == stepping:
-        memory, pointer, s, relative_pointer = intcode_comp(memory, args, True, pointer, relative_pointer)
-        output, memory, pointer, relative_pointer = run_line(memory, pointer, relative_pointer, args)
-
-    if isinstance(output, int):
-        return world, output
-
-    memory, pointer, s, relative_pointer = intcode_comp(memory, args, True, pointer, relative_pointer)
-    output, memory, pointer, relative_pointer = run_line(memory, pointer, relative_pointer, args)
+    return_val = None
 
     while not finished:
         memory, pointer, s, relative_pointer = intcode_comp(memory, args, True, pointer, relative_pointer)
@@ -50,27 +30,25 @@ def parse_world(data, args, stepping="Walking...\n"):
             finished = True
         else:
             if s != 10:
-                world[cur_pos] = str(chr(s))
+                output[cur_pos] = str(chr(s)) if s < 1000 else str(s)
 
             if s == 10:
+                max_x = max(max_x, cur_pos[0])
                 cur_pos = (0, cur_pos[1] + 1)
             else:
                 cur_pos = (cur_pos[0] + 1, cur_pos[1])
+                return_val = s
 
-    return world, None
+    print_output(output, max_x, cur_pos[1])
+    return return_val
 
 
-def print_world(world):
-    max_x, max_y = 0, 0
-    for k in world:
-        max_x, max_y = max(max_x, k[0]), max(max_y, k[1])
-
+def print_output(output, max_x, max_y):
     for y in range(max_y):
-
-        if (0, y) in world:
+        if (0, y) in output:
             line = ""
             for x in range(max_x):
-                line += world[(x, y)]
+                line += output.get((x, y), " ")
             print(line)
         else:
             print("\n")
@@ -78,24 +56,14 @@ def print_world(world):
 
 def part1(data):
     main = "NOT C T\nAND D T\nNOT A J\nOR T J\nWALK\n"
-    args = [ord(c) for c in main]
-
-    world, result = parse_world(data, args)
-
-    if world is not None:
-        print_world(world)
+    result = run_acsii_program(data, main)
 
     return result
 
 
 def part2(data):
     main = "NOT C T\nAND D T\nAND H T\nNOT A J\nOR T J\nNOT B T\nAND D T\nOR T J\nRUN\n"
-    args = [ord(c) for c in main]
-
-    world, result = parse_world(data, args, "Running...\n")
-
-    if world is not None:
-        print_world(world)
+    result = run_acsii_program(data, main)
 
     return result
 
