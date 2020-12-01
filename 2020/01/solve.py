@@ -1,5 +1,7 @@
 #!/usr/bin/env python
+from functools import reduce
 from itertools import combinations
+from operator import mul
 
 test_1 = """1721
 979
@@ -12,24 +14,21 @@ test_3 = """"""
 test_4 = """"""
 
 
-def part1(data):
+def expense_in_parts(data, parts):
     expenses = [int(x) for x in data]
-    combos = combinations(expenses, 2)
-    for c in combos:
+    for c in combinations(expenses, parts):
         if sum(c) == 2020:
-            return c[0] * c[1]
+            return reduce(mul, c)
 
     return None
+
+
+def part1(data):
+    return expense_in_parts(data, 2)
 
 
 def part2(data):
-    expenses = [int(x) for x in data]
-    combos = combinations(expenses, 3)
-    for c in combos:
-        if sum(c) == 2020:
-            return c[0] * c[1] * c[2]
-
-    return None
+    return expense_in_parts(data, 3)
 
 
 if __name__ == '__main__':
