@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import sys
-
 test_1 = """"""
 test_2 = """"""
 test_3 = """"""
@@ -18,13 +16,13 @@ def part2(data):
 
 if __name__ == '__main__':
 
-    assert part1(test_1) == None
-    assert part1(test_2) == None
-    assert part2(test_3) == None
-    assert part2(test_4) == None
+    assert part1(test_1.splitlines()) == None
+    assert part1(test_2.splitlines()) == None
+    assert part2(test_3.splitlines()) == None
+    assert part2(test_4.splitlines()) == None
 
     with open('input') as f:
-        data = f.read()
+        data = f.readlines()
 
     print(part1(data))
     print(part2(data))
