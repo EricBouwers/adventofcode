@@ -15,10 +15,10 @@ def part1(data):
     for line in data:
         parts = line.split(" ")
         letter = parts[1][0]
-        minimal, maximal = parts[0].split("-")
+        minimal, maximal = [int(x) for x in parts[0].split("-")]
         letter_count = sum([1 if x == letter else 0 for x in parts[2]])
 
-        valid += 1 if int(minimal) <= letter_count <= int(maximal) else 0
+        valid += 1 if minimal <= letter_count <= maximal else 0
     return valid
 
 
