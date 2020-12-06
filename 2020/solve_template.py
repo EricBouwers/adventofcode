@@ -22,7 +22,7 @@ if __name__ == '__main__':
     assert part2(test_4.splitlines()) == None
 
     with open('input') as f:
-        data = f.readlines()
+        data = f.read()
 
     print(part1(data))
     print(part2(data))
