@@ -24,6 +24,6 @@ if __name__ == '__main__':
     with open('input') as f:
         data = f.read()
 
-    print(part1(data))
-    print(part2(data))
+    print(part1(data.splitlines()))
+    print(part2(data.splitlines()))
 
