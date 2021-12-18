@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import itertools
+import json
 from functools import reduce
 
 test_1 = """[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
@@ -125,12 +126,12 @@ def magnitude(p):
 
 
 def part1(data):
-    result_pair = reduce(add_pair, map(eval, data))
+    result_pair = reduce(add_pair, map(json.loads, data))
     return magnitude(result_pair)
 
 
 def part2(data):
-    pairs = map(eval, data)
+    pairs = map(json.loads, data)
     return max([max(magnitude(add_pair(x, y)), magnitude(add_pair(y, x))) for x,y in itertools.combinations(pairs, 2)])
 
 
