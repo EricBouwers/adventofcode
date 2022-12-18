@@ -22,7 +22,6 @@ def print_cave(max_y, cave):
 def let_it_fall(data, block_count=2022):
     cave = keydefaultdict(lambda c: 1 if c[0] in [0, 8] or c[1] == 0 else 0)
     jets = [j for j in data[0]]
-    max_y = 0
 
     blocks = [
         lambda l, b: [(l, b), (l + 1, b), (l + 2, b), (l + 3, b)],
@@ -32,35 +31,56 @@ def let_it_fall(data, block_count=2022):
         lambda l, b: [(l, b), (l, b + 1), (l + 1, b), (l + 1, b + 1)],
     ]
 
+    cache = {}
+
     i = 0
+    max_y, jeti, blocki = 0, 0, 0
+    jetlen, blocklen = len(jets), len(blocks)
+    last_line = "".join([str(cave[(x, y)]) for x in range(1, 8) for y in range(max_y, max_y - 10, -1)])
+    add_y = 0
+    cache_used = False
+
     while i < block_count:
-        cur_block = blocks.pop(0)
-        cur_block_y = max_y + 4
-        cur_block_x = 3
+        cache_key = (last_line, jeti, blocki)
+        if cache_key in cache and not cache_used:
+            prev_i, prev_y = cache[cache_key]
+            cycle_len = i - prev_i
+            steps = int((block_count - i) / cycle_len)
+            i = i + (steps * cycle_len)
+            add_y = (max_y - prev_y) * steps
+            cache_used = True
+        else:
+            cache[cache_key] = i, max_y
 
-        cur_block_data = cur_block(cur_block_x, cur_block_y)
+            cur_block = blocks[blocki]
+            cur_block_y = max_y + 4
+            cur_block_x = 3
 
-        while sum([cave[p] for p in cur_block_data]) == 0:
-            jet = jets.pop(0)
-            if jet == '>' and sum([cave[p] for p in cur_block(cur_block_x + 1, cur_block_y)]) == 0:
-                cur_block_x += 1
-            elif jet == '<' and sum([cave[p] for p in cur_block(cur_block_x - 1, cur_block_y)]) == 0:
-                cur_block_x -= 1
-
-            jets.append(jet)
-
-            cur_block_y -= 1
             cur_block_data = cur_block(cur_block_x, cur_block_y)
 
-        cur_block_data = cur_block(cur_block_x, cur_block_y + 1)
-        for p in cur_block_data:
-            cave[p] = 1
-            max_y = max(max_y, p[1])
-        blocks.append(cur_block)
-        i += 1
+            while sum([cave[p] for p in cur_block_data]) == 0:
+                jet = jets[jeti]
+                if jet == '>' and sum([cave[p] for p in cur_block(cur_block_x + 1, cur_block_y)]) == 0:
+                    cur_block_x += 1
+                elif jet == '<' and sum([cave[p] for p in cur_block(cur_block_x - 1, cur_block_y)]) == 0:
+                    cur_block_x -= 1
 
-    print(max_y)
-    return max_y
+                jeti = (jeti + 1) % jetlen
+
+                cur_block_y -= 1
+                cur_block_data = cur_block(cur_block_x, cur_block_y)
+
+            cur_block_data = cur_block(cur_block_x, cur_block_y + 1)
+            for p in cur_block_data:
+                cave[p] = 1
+                max_y = max(max_y, p[1])
+
+            i += 1
+            blocki = (blocki + 1) % blocklen
+            last_line = "".join([str(cave[(x,y)]) for x in range(1,8) for y in range(max_y, max_y-10, -1)])
+
+    print(max_y + add_y)
+    return max_y + add_y
 
 
 def part1(data):
@@ -79,6 +99,5 @@ if __name__ == '__main__':
     with open('input') as f:
         data = f.read()
 
-    print(part1(data.splitlines()))  # 3101 is too low, 3148 is too high
+    print(part1(data.splitlines()))
     print(part2(data.splitlines()))
-
