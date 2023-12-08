@@ -4,11 +4,18 @@ test_1 = """"""
 test_2 = """"""
 
 
+def parse_data(data):
+    return data
+
+
 def part1(data):
+    parsed = parse_data(data)
+    print(parsed)
     return None
 
 
 def part2(data):
+    parsed = parse_data(data)
     return None
 
 
