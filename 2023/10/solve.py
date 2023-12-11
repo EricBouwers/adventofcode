@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 test_1 = """-L|F7
 7S-7|
@@ -95,6 +95,21 @@ def parse_data(data):
     if grid[step(start, RIGHT)] in "-J7":
         start_dirs.append(RIGHT)
 
+    if start_dirs[0] == UP:
+        if start_dirs[1] == DOWN:
+            grid[start] = '|'
+        elif start_dirs[1] == LEFT:
+            grid[start] = 'J'
+        elif start_dirs[1] == RIGHT:
+            grid[start] = 'L'
+    elif start_dirs[0] == DOWN:
+        if start_dirs[1] == LEFT:
+            grid[start] = '7'
+        elif start_dirs[1] == RIGHT:
+            grid[start] = 'F'
+    else:
+        grid[start] = '-'
+
     return start, start_dirs, grid
 
 
@@ -111,20 +126,48 @@ def part1(data):
             new_dir = PIPES[grid[new_pos]](state[1])
             new_state.append((new_pos, new_dir))
         cur_state = new_state
-        print(cur_state, steps)
 
     return steps
 
 
 def part2(data):
-    parsed = parse_data(data)
-    return None
+    start, start_dirs, grid = parse_data(data)
+
+    cur_state = (start, start_dirs[1])
+    pipe_coords = []
+
+    while start not in pipe_coords:
+        new_pos = step(*cur_state)
+        new_dir = PIPES[grid[new_pos]](cur_state[1])
+        cur_state = (new_pos, new_dir)
+        pipe_coords.append(new_pos)
+
+    # shoelace solution
+    shoe_surface = 0
+    for p1, p2 in zip(pipe_coords, pipe_coords[1:] + [pipe_coords[0]]):
+        shoe_surface += p1[0] * p2[1] - p1[1] * p2[0]
+
+    shoe_surface = abs(shoe_surface / 2)
+    shoe_surface = int(shoe_surface) - len(pipe_coords)/2 + 1
+
+    # trace
+    trace_surface = 0
+    for y in range(0, len(data)):
+        inside = False
+        for x in range(0, len(data[0])):
+            if grid[(x, y)] in '|7F' and (x, y) in pipe_coords:
+                inside = not inside
+            elif (x, y) not in pipe_coords:
+                trace_surface += 1 if inside else 0
+
+    return shoe_surface
 
 
 if __name__ == '__main__':
 
     assert part1(test_1.splitlines()) == 4
     assert part1(test_2.splitlines()) == 8
+    assert part2(test_1.splitlines()) == 1
     assert part2(test_3.splitlines()) == 4
     assert part2(test_4.splitlines()) == 4
     assert part2(test_5.splitlines()) == 8
