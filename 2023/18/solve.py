@@ -16,6 +16,7 @@ L 2 (#015232)
 U 2 (#7a21e3)"""
 test_2 = """"""
 
+
 def take_step(dir, pos):
     return pos[0] + dir[0], pos[1] + dir[1]
 
@@ -36,36 +37,32 @@ def part1(data):
     steps = parse_data(data)
     directions = {'R': (1, 0), 'L': (-1, 0), 'U': (0, -1), 'D': (0, 1)}
 
-    edge = 0
-    prev_coor, coor = None, (0, 0)
-    surface = 0
-
+    edge = []
+    perimeter = 0
+    coor = (0, 0)
     for step in steps:
-        for i in range(0, step[1]):
-            prev_coor = coor
-            coor = take_step(directions[step[0]], coor)
-            edge += 1
-            surface += prev_coor[0] * coor[1] - coor[0] * prev_coor[1]
+        dist, dir = step[1], directions[step[0]]
+        perimeter += dist
+        coor = take_step((dir[0] * dist, dir[1] * dist), coor)
+        edge.append(coor)
 
-    return abs(surface / 2) + edge/2 + 1
+    return shoelace_surface(edge) + perimeter/2 + 1
 
 
 def part2(data):
     steps = parse_data(data)
     directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
 
-    edge = 0
-    prev_coor, coor = None, (0, 0)
-    surface = 0
-
+    edge = []
+    perimeter = 0
+    coor = (0, 0)
     for step in steps:
-        for i in range(0, int(step[2][1:-1], 16)):
-            prev_coor = coor
-            coor = take_step(directions[int(step[2][-1])], coor)
-            edge += 1
-            surface += prev_coor[0] * coor[1] - coor[0] * prev_coor[1]
+        dist, dir = int(step[2][1:-1], 16), directions[int(step[2][-1])]
+        perimeter += dist
+        coor = take_step((dir[0] * dist, dir[1] * dist), coor)
+        edge.append(coor)
 
-    return abs(surface / 2) + edge/2 + 1
+    return shoelace_surface(edge) + perimeter/2 + 1
 
 
 if __name__ == '__main__':
