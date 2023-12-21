@@ -87,10 +87,20 @@ def part2(data, steps=26501365):
         if key in seen_configs:
             seen_configs[key][1].append(sum([len(x) for x in cur_pos.values()]))
 
-            to_go = steps - s
-            if to_go % 131 == 0:
+            to_go = steps - s - 1
+            if to_go % 131 == 0:  # hard-coded for part 2
                 diffs = [t - s for s, t in zip(seen_configs[key][1], seen_configs[key][1][1:])]
-                print(s, to_go / 131, seen_configs[key], diffs, [t - s for s, t in zip(diffs, diffs[1:])])
+                diff_diffs = [t - s for s, t in zip(diffs, diffs[1:])]
+                print(s, to_go / 131, seen_configs[key], diffs, diff_diffs)
+
+                if len(diff_diffs) == 1:
+                    cur_count = seen_configs[key][1][-1]
+                    cur_diff = diffs[-1]
+                    diff_add = diff_diffs[-1]
+                    for i in range(0, int(to_go / 131)):
+                        cur_diff += diff_add
+                        cur_count += cur_diff
+                    return cur_count
         else:
             seen_configs[key] = [s, [sum([len(x) for x in cur_pos.values()])]]
 
@@ -109,16 +119,4 @@ if __name__ == '__main__':
         data = f.read()
 
     print(part1(data.splitlines()))
-    # print(part2(data.splitlines()))
-
-    # based on eyeballing prints
-    cur_count = 94909
-    cur_diff = 60656
-    diff_add = 30270
-    start = 326
-    cycle_length = 131
-    for i in range(0, 202298):
-        cur_diff += diff_add
-        cur_count += cur_diff
-        print(cur_count, start + ((i+1) * cycle_length))
-
+    print(part2(data.splitlines()))
