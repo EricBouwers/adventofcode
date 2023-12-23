@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-import heapq
 from collections import defaultdict
-from heapq import heapify
 
 test_1 = """#.#####################
 #.......#########...###
@@ -102,15 +100,14 @@ def find_hikes(data):
     grid, start, end = parse_data(data)
 
     paths = [(start, set())]
-    heapify(paths)
     visited_paths = {}
 
     while paths:
-        cur_pos, seen = heapq.heappop(paths)
+        cur_pos, seen = paths.pop()
         for poss in possible_steps(cur_pos, grid, False):
             if poss not in seen:
                 visited_paths[poss] = seen if poss not in visited_paths or len(seen) > len(visited_paths[poss]) else visited_paths[poss]
-                heapq.heappush(paths, (poss, seen | {cur_pos}))
+                paths.append((poss, seen | {cur_pos}))
 
     return visited_paths[end]
 
