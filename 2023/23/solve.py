@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import heapq
+from collections import defaultdict
 from heapq import heapify
 
 test_1 = """#.#####################
@@ -68,7 +69,36 @@ def possible_steps(cur_pos, grid, can_slope):
     return [pos for pos in map(lambda d: take_step(d, cur_pos), directions) if pos in grid and grid[pos] != '#']
 
 
-def find_hikes(data, can_slope=False):
+def print_path(path, grid, max_y, max_x):
+    for y in range(0, max_y):
+        line = ''
+        for x in range(0, max_x):
+            line += '0' if (x, y) in path else grid[(x, y)]
+        print(line)
+
+
+def condens(grid, from_to):
+    for p, c in grid.items():
+        if c != '#':
+            from_to[p] = set([(p, 1) for p in possible_steps(p, grid, True)])
+
+    prev_len = 0
+    while len(from_to) != prev_len:
+        prev_len = len(from_to)
+        to_del = []
+        for k, v in from_to.items():
+            if len(v) == 2:
+                f, t = v
+                from_to[f[0]].remove((k, f[1]))
+                from_to[t[0]].remove((k, t[1]))
+                from_to[f[0]].add((t[0], t[1] + f[1]))
+                from_to[t[0]].add((f[0], t[1] + f[1]))
+                to_del.append(k)
+        for k in to_del:
+            del from_to[k]
+
+
+def find_hikes(data):
     grid, start, end = parse_data(data)
 
     paths = [(start, set())]
@@ -77,23 +107,37 @@ def find_hikes(data, can_slope=False):
 
     while paths:
         cur_pos, seen = heapq.heappop(paths)
-        seen.add(cur_pos)
-        for poss in possible_steps(cur_pos, grid, can_slope):
-            if poss not in seen and (poss not in visited_paths or len(visited_paths[poss]) <= len(seen)):
-                visited_paths[poss] = seen
-                heapq.heappush(paths, (poss, set(seen)))
+        for poss in possible_steps(cur_pos, grid, False):
+            if poss not in seen:
+                visited_paths[poss] = seen if poss not in visited_paths or len(seen) > len(visited_paths[poss]) else visited_paths[poss]
+                heapq.heappush(paths, (poss, seen | {cur_pos}))
 
     return visited_paths[end]
 
 
 def part1(data):
-    path = find_hikes(data, False)
-    return len(path)
+    path = find_hikes(data)
+    return len(path) + 1
 
 
 def part2(data):
-    path = find_hikes(data, True)
-    return len(path)
+    grid, start, end = parse_data(data)
+
+    from_to = defaultdict(lambda: set())
+    condens(grid, from_to)
+
+    paths = [(start, set(), 0)]
+    visited_paths = {}
+
+    while paths:
+        cur_pos, seen, to_me = paths.pop()
+        for poss, to_poss in from_to[cur_pos]:
+            path_len = to_me + to_poss
+            if poss not in seen:
+                visited_paths[poss] = path_len if poss not in visited_paths or path_len > visited_paths[poss] else visited_paths[poss]
+                paths.append((poss, seen | {cur_pos}, path_len))
+
+    return visited_paths[end]
 
 
 if __name__ == '__main__':
@@ -109,5 +153,5 @@ if __name__ == '__main__':
 
 # too low 4886, 4887, 5306 also too low
 
-# 5586
+# 5586, 5722
 # 6682
