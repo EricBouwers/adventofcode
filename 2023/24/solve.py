@@ -2,6 +2,7 @@
 from itertools import combinations
 
 from sympy import Symbol, solve_poly_system
+from z3 import Real, Solver, Int
 
 test_1 = """19, 13, 30 @ -2,  1, -2
 18, 19, 22 @ -1, -1, -2
@@ -65,41 +66,62 @@ def part1(data, min_p=200000000000000, max_p=400000000000000):
     return collide
 
 
-def part2(data):
+def part2(data, use_z3=False):
     stones = parse_data(data)
 
-    x = Symbol('x')
-    y = Symbol('y')
-    z = Symbol('z')
-    vx = Symbol('vx')
-    vy = Symbol('vy')
-    vz = Symbol('vz')
+    if not use_z3:
+        x = Symbol('x')
+        y = Symbol('y')
+        z = Symbol('z')
+        vx = Symbol('vx')
+        vy = Symbol('vy')
+        vz = Symbol('vz')
 
-    equations = []
-    time_symbols = []
+        equations = []
+        time_symbols = []
 
-    for i, stone in enumerate(stones[:3]):
-        stone_time = Symbol('t' + str(i))
-        eqx = x + vx * stone_time - stone[0][0] - stone[1][0] * stone_time
-        eqy = y + vy * stone_time - stone[0][1] - stone[1][1] * stone_time
-        eqz = z + vz * stone_time - stone[0][2] - stone[1][2] * stone_time
+        for i, stone in enumerate(stones[:3]):
+            stone_time = Symbol('t' + str(i))
+            eqx = x + vx * stone_time - stone[0][0] - stone[1][0] * stone_time
+            eqy = y + vy * stone_time - stone[0][1] - stone[1][1] * stone_time
+            eqz = z + vz * stone_time - stone[0][2] - stone[1][2] * stone_time
 
-        equations += [eqx, eqy, eqz]
-        time_symbols += [stone_time]
+            equations += [eqx, eqy, eqz]
+            time_symbols += [stone_time]
 
-    result = solve_poly_system(equations, *([x, y, z, vx, vy, vz] + time_symbols))
+        result = solve_poly_system(equations, *([x, y, z, vx, vy, vz] + time_symbols))
 
-    return sum(list(result[0])[0:3])
+        return sum(list(result[0])[0:3])
+    else:
+        x = Real('x')
+        y = Real('y')
+        z = Real('z')
+        vx = Real('vx')
+        vy = Real('vy')
+        vz = Real('vz')
+
+        s = Solver()
+
+        for i, stone in enumerate(stones):
+            stone_time = Real('t' + str(i))
+            s.add(stone_time >= 0)
+            s.add(x + vx * stone_time == stone[0][0] + stone[1][0] * stone_time)
+            s.add(y + vy * stone_time == stone[0][1] + stone[1][1] * stone_time)
+            s.add(z + vz * stone_time == stone[0][2] + stone[1][2] * stone_time)
+
+        s.check()
+        return s.model().eval(x+y+z)
 
 
 if __name__ == '__main__':
 
     assert part1(test_1.splitlines(), 7, 27) == 2
-    assert part2(test_1.splitlines()) == 47
+    assert part2(test_1.splitlines(), False) == 47
+    assert part2(test_1.splitlines(), True) == 47
 
     with open('input') as f:
         data = f.read()
 
     print(part1(data.splitlines()))
-    print(part2(data.splitlines()))
+    print(part2(data.splitlines(), True))
 
