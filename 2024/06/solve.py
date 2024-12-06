@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import operator
 from collections import defaultdict
 
 test_1 = """....#.....
@@ -31,8 +32,7 @@ def parse_data(data):
 
 
 def take_step(pos, d):
-    return (pos[0] + DIRECTIONS[d][0],
-            pos[1] + DIRECTIONS[d][1])
+    return tuple([operator.add(*x) for x in zip(pos, DIRECTIONS[d])])
 
 
 def has_loop(grid, cur_pos):
