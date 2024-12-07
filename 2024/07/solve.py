@@ -22,18 +22,15 @@ def parse_data(data):
     return equations
 
 
-def flatten(t):
-    return [item for sublist in t for item in sublist]
-
-
 def can_be_true(out, ins, concat=False):
     tries = [ins[0]]
     for x in ins[1:]:
-        tries = flatten([[
-            t+x,
-            t*x,
-            int(str(t) + str(x)) if concat else 0
-        ] for t in tries])
+        new_tries = []
+        for t in tries:
+            new_tries.append(t+x)
+            new_tries.append(t * x)
+            new_tries.append(int(f"{t}{x}") if concat else 0)
+        tries = [t for t in new_tries if t <= out]
 
     return out in tries
 
