@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import itertools
+import operator
 from collections import defaultdict
 
 test_1 = """............
@@ -38,42 +39,41 @@ def parse_data(data):
     return antennas, len(data[0]), len(data)
 
 
-def part1(data):
-    antennas, max_x, max_y = parse_data(data)
+def one_way(a1, a2, max_x, max_y, max_steps):
+    antinodes = set()
+    x_diff = a1[0] - a2[0]
+    y_diff = a1[1] - a2[1]
 
+    new_pos = (a1[0] + x_diff, a1[1] + y_diff)
+    in_bounds = 0 <= new_pos[0] < max_x and 0 <= new_pos[1] < max_y
+    steps = 0
+    while in_bounds and steps < max_steps:
+        antinodes.add(new_pos)
+        new_pos = (new_pos[0] + x_diff, new_pos[1] + y_diff)
+        in_bounds = 0 <= new_pos[0] < max_x and 0 <= new_pos[1] < max_y
+        steps += 1
+
+    return antinodes
+
+
+def get_antinodes(antennas, max_x, max_y, max_steps=1):
     antinodes = set()
     for antenna in antennas.keys():
         for a1, a2 in itertools.combinations(antennas[antenna], 2):
-            x_diff = a1[0] - a2[0]
-            y_diff = a1[1] - a2[1]
-            antinodes.add((a1[0] + x_diff, a1[1] + y_diff))
-            antinodes.add((a2[0] - x_diff, a2[1] - y_diff))
+            antinodes.update(one_way(a1, a2, max_x, max_y, max_steps))
+            antinodes.update(one_way(a2, a1, max_x, max_y, max_steps))
 
-    return len([c for c in antinodes if 0 <= c[0] < max_x and 0 <= c[1] < max_y])
+    return antinodes
+
+
+def part1(data):
+    antennas, max_x, max_y = parse_data(data)
+    return len(get_antinodes(antennas, max_x, max_y))
 
 
 def part2(data):
     antennas, max_x, max_y = parse_data(data)
-
-    antinodes = set()
-    for antenna in antennas.keys():
-        for a1, a2 in itertools.combinations(antennas[antenna], 2):
-            x_diff = a1[0] - a2[0]
-            y_diff = a1[1] - a2[1]
-
-            new_pos = (a1[0] + x_diff, a1[1] + y_diff)
-            in_bounds = 0 <= new_pos[0] < max_x and 0 <= new_pos[1] < max_y
-            while in_bounds:
-                antinodes.add(new_pos)
-                new_pos = (new_pos[0] + x_diff, new_pos[1] + y_diff)
-                in_bounds = 0 <= new_pos[0] < max_x and 0 <= new_pos[1] < max_y
-
-            new_pos = (a2[0] - x_diff, a2[1] - y_diff)
-            in_bounds = 0 <= new_pos[0] < max_x and 0 <= new_pos[1] < max_y
-            while in_bounds:
-                antinodes.add(new_pos)
-                new_pos = (new_pos[0] - x_diff, new_pos[1] - y_diff)
-                in_bounds = 0 <= new_pos[0] < max_x and 0 <= new_pos[1] < max_y
+    antinodes = get_antinodes(antennas, max_x, max_y, 1000)
 
     for v in [x for x in antennas.values() if len(x) > 1]:
         antinodes.update(set(v))
