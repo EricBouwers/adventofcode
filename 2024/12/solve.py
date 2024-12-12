@@ -43,18 +43,14 @@ def parse_data(data):
     grid = {}
     for y, l in enumerate(data):
         for x, c in enumerate(l):
-            grid[(x, y)] = c
+            grid[complex(x, y)] = c
     return grid
-
-
-def take_step(pos, d):
-    return tuple([operator.add(*x) for x in zip(pos, d)])
 
 
 def get_diagonal_neighbours(position, value, grid):
     neighbours = []
-    for d in [(1, 1), (-1, -1), (-1, 1), (1, -1)]:
-        new_pos = take_step(position, d)
+    for d in [1+1j, -1-1j, -1+1j, 1-1j]:
+        new_pos = position + d
         if new_pos in grid and grid[new_pos] == value:
             neighbours.append(new_pos)
 
@@ -63,8 +59,8 @@ def get_diagonal_neighbours(position, value, grid):
 
 def get_neighbours(position, value, grid):
     neighbours = []
-    for d in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
-        new_pos = take_step(position, d)
+    for d in [1, 1j, -1, -1j]:
+        new_pos = position + d
         if new_pos in grid and grid[new_pos] == value:
             neighbours.append(new_pos)
 
@@ -106,7 +102,7 @@ def get_corners(plant, neighbours, id, grid):
     elif len(neighbours) == 1:
         return 2
     elif len(neighbours) == 2:
-        if neighbours[0][0] == neighbours[1][0] or neighbours[0][1] == neighbours[1][1]:
+        if neighbours[0].real == neighbours[1].real or neighbours[0].imag == neighbours[1].imag:
             return 0  # straight line
         else:
             n1 = get_neighbours(neighbours[0], id, grid)
