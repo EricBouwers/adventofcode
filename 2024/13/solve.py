@@ -66,7 +66,7 @@ def part2(data):
 
 if __name__ == '__main__':
 
-    # assert part1(test_1.splitlines()) == 480
+    assert part1(test_1.splitlines()) == 480
     assert part2(test_1.splitlines()) > 0
 
 
