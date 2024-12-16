@@ -1,5 +1,7 @@
 #!/usr/bin/env python
+import heapq
 from collections import defaultdict
+from heapq import heapify
 
 test_1 = """###############
 #.......#....E#
@@ -69,24 +71,24 @@ def get_next_steps(cur_pos, facing, maze):
 
 
 def get_end_paths(maze, start, end):
-    paths = [(0, start, 'E', [(start, 'E')])]
+    paths = [(0, (start.real, start.imag), 'E', [(start, 'E')])]
+    heapify(paths)
     ends = []
     global_seen = defaultdict(lambda: 1000000)
     all_path = defaultdict(lambda: list())
 
     while paths:
-        score, cur_pos, facing, seen = paths.pop(0)
+        score, cur_pos, facing, seen = heapq.heappop(paths)
+        cur_pos = complex(cur_pos[0], cur_pos[1])
         for p, d, s in get_next_steps(cur_pos, facing, maze):
             new_score = score + s
             if p == end:
                 ends.append((new_score, p, d, seen + [(p, d)]))
             elif (p, d) not in seen and global_seen[(p, d)] > new_score:
-                paths.append((new_score, p, d, seen + [(p, d)]))
+                heapq.heappush(paths, (new_score, (p.real, p.imag), d, seen + [(p, d)]))
                 global_seen[(p, d)] = new_score
             elif global_seen[(p, d)] == new_score:
                 all_path[(p, d)].extend(seen)
-
-            paths.sort(key=lambda x: x[0])
 
     return ends, all_path
 
@@ -128,8 +130,6 @@ def part2(data):
         all_pos = set(updated_all_pos)
         new_len = len(all_pos)
 
-    print_grid(maze, [x[0] for x in all_pos], data)
-    print(len(all_pos), all_pos)
     return len(set([x[0] for x in all_pos]))
 
 
