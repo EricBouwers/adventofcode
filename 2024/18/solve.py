@@ -52,22 +52,22 @@ def print_grid(grid, size):
 def find_path(grid, size):
     start = (0, 0)
     end = (size-1, size-1)
-    paths = [(0, start)]
+    paths = [(0, start, [])]
     heapify(paths)
     seens = defaultdict(lambda: 1000000)
 
     while paths:
-        steps, coor = heapq.heappop(paths)
+        steps, coor, path = heapq.heappop(paths)
         if coor == end:
-            return steps
+            return steps, path + [coor]
         else:
             for d in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
                 new_c = (coor[0] + d[0], coor[1] + d[1])
                 if new_c in grid and grid[new_c] != '#' and seens[new_c] > steps + 1:
-                    heapq.heappush(paths, (steps+1, new_c))
+                    heapq.heappush(paths, (steps+1, new_c, path + [coor]))
                     seens[new_c] = steps+1
 
-    return None
+    return None, None
 
 
 def part1(data, size=71, fallen=1024):
@@ -77,24 +77,27 @@ def part1(data, size=71, fallen=1024):
     for i in range(fallen):
         grid[corrupts[i]] = '#'
 
-    return find_path(grid, size)
+    return find_path(grid, size)[0]
 
 
-def part2(data, size=71, fallen=1024):
+def part2(data, size=71):
     corrupts = parse_data(data)
     grid = {(x, y): '.' for x in range(size) for y in range(size)}
 
+    _, cur_path = find_path(grid, size)
     for corrupt in corrupts:
         grid[corrupt] = '#'
-        steps = find_path(grid, size)
-        if steps is None:
-            return corrupt
+        if corrupt in cur_path:
+            _, cur_path = find_path(grid, size)
+
+            if cur_path is None:
+                return corrupt
 
 
 if __name__ == '__main__':
 
     assert part1(test_1.splitlines(), size=7, fallen=12) == 22
-    assert part2(test_1.splitlines(), size=7, fallen=12) == (6, 1)
+    assert part2(test_1.splitlines(), size=7) == (6, 1)
 
     with open('input') as f:
         data = f.read()
