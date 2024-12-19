@@ -33,12 +33,9 @@ def get_all_matches(design, towels):
     if design == "":
         return 1
     else:
-        matches = 0
-        for t in towels:
-            if design.startswith(t):
-                matches += get_all_matches(design[len(t):], towels)
-
-        return matches
+        return sum([
+            get_all_matches(design[len(t):], towels) for t in towels if design.startswith(t)
+        ])
 
 
 def part1(data):
