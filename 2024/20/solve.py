@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import heapq
+import itertools
 from collections import defaultdict
 from heapq import heapify
 
@@ -37,6 +38,7 @@ def parse_data(data):
 
     return grid, start, end
 
+
 def get_end_path(grid, start, end):
     paths = [(0, start[0], start[1], {start: 0})]
     heapify(paths)
@@ -49,7 +51,8 @@ def get_end_path(grid, start, end):
             if grid[new_pos] == "#":
                 continue
             elif new_pos == end:
-                return score + 1, path | {new_pos: score + 1}
+
+                return score + 1, {complex(p[0], p[1]): s for p, s in (path | {new_pos: score + 1}).items()}
             elif new_pos not in path and global_seen[new_pos] > score + 1:
                 heapq.heappush(paths, (score + 1, new_pos[0], new_pos[1], path | {new_pos: score + 1}))
                 global_seen[new_pos] = score + 1
@@ -57,74 +60,41 @@ def get_end_path(grid, start, end):
     return None
 
 
-def get_next_steps(position):
-    return [
-        (position[0] + x, position[1] + y) for x, y in [(0, 1), (0, -1), (1, 0), (-1, 0)]
-    ]
-
-
-def get_position_cheats(position, path, grid, max_len):
-    to_check = [(1, p[0], p[1], [position]) for p in get_next_steps(position)]
-    cheats = {}
-    heapify(to_check)
-    global_seen = defaultdict(lambda: 1000000)
-
-    while to_check:
-        cheated, cur_x, cur_y, my_path = heapq.heappop(to_check)
-        cur_pos = (cur_x, cur_y)
-        if grid[cur_pos] == '.':
-            cheat_key = (position, cur_pos)
-            save_seconds = path[position] - path[cur_pos] - cheated
-            if cheat_key not in cheats or cheats[cheat_key] < save_seconds:
-                cheats[cheat_key] = save_seconds
-            else:
-                print(cheats[cheat_key], save_seconds)
-
-        # elif grid[cur_pos] == '#':
-        if cheated < max_len:
-            for p in get_next_steps(cur_pos):
-                if global_seen[p] > cheated + 1:
-                    heapq.heappush(to_check, (cheated + 1, p[0], p[1], my_path + [cur_pos]))
-                    global_seen[p] = cheated + 1
-
-    return cheats
-
-
 def get_check_cross(max_cheats):
     cross = set()
     for x in range(max_cheats + 1):
-        cross.add((x, 0, x))
-        cross.add((-x, 0, x))
-        cross.add((0, x, x))
-        cross.add((0, -x, x))
+        cross.add((complex(x, 0), x))
+        cross.add((complex(-x, 0), x))
+        cross.add((complex(0, x), x))
+        cross.add((complex(0, -x), x))
         for y in range(max_cheats - x + 1):
-            cross.add((x, y, x + y))
-            cross.add((-x, y, x + y))
-            cross.add((-x, -y, x + y))
-            cross.add((y, x, x + y))
-            cross.add((y, -x, x + y))
-            cross.add((-y, -x, x + y))
+            cross.add((complex(x, y), x + y))
+            cross.add((complex(-x, y), x + y))
+            cross.add((complex(-x, -y), x + y))
+            cross.add((complex(y, x), x + y))
+            cross.add((complex(y, -x), x + y))
+            cross.add((complex(-y, -x), x + y))
 
-    return [x for x in cross if x != (0, 0)]
+    return [x for x in cross if x != complex(0, 0)]
 
 
 def get_position_cheats_cross(position, path, cross):
-    cheats = {}
-    for add_x, add_y, cheated in cross:
-        new_pos = (position[0] + add_x, position[1] + add_y)
+    cheats = []
+    for add, cheated in cross:
+        new_pos = position + add
         if new_pos in path:
             cheat_key = (position, new_pos)
             save_seconds = path[position] - path[new_pos] - cheated
-            cheats[cheat_key] = save_seconds
+            cheats.append(save_seconds)
 
     return cheats
 
 
-def get_cheats(path, grid, max_len=2):
-    cheats = {}
+def get_cheats(path, max_len=2):
+    cheats = []
     check_cross = get_check_cross(max_len)
     for position, score in path.items():
-        cheats |= get_position_cheats_cross(position, path, check_cross)
+        cheats.extend(get_position_cheats_cross(position, path, check_cross))
 
     return cheats
 
@@ -132,17 +102,17 @@ def get_cheats(path, grid, max_len=2):
 def part1(data, save_seconds=100):
     grid, start, end = parse_data(data)
     score, path = get_end_path(grid, start, end)
-    cheats = get_cheats(path, grid)
+    cheats = get_cheats(path)
 
-    return len([k for k, v in cheats.items() if v >= save_seconds])
+    return len([v for v in cheats if v >= save_seconds])
 
 
 def part2(data, save_seconds=100):
     grid, start, end = parse_data(data)
     score, path = get_end_path(grid, start, end)
-    cheats = get_cheats(path, grid, max_len=20)
+    cheats = get_cheats(path, max_len=20)
 
-    return len([k for k, v in cheats.items() if v >= save_seconds])
+    return len([v for v in cheats if v >= save_seconds])
 
 
 if __name__ == '__main__':
@@ -156,5 +126,3 @@ if __name__ == '__main__':
 
     print(part1(data.splitlines()))
     print(part2(data.splitlines()))
-
-# too low 222879, 956486
