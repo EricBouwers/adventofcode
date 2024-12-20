@@ -64,7 +64,7 @@ def get_next_steps(position):
 
 
 def get_position_cheats(position, path, grid, max_len):
-    to_check = [(1, p[0], p[1], [position]) for p in get_next_steps(position) if grid[p] == "#"]
+    to_check = [(1, p[0], p[1], [position]) for p in get_next_steps(position)]
     cheats = {}
     heapify(to_check)
     global_seen = defaultdict(lambda: 1000000)
@@ -90,10 +90,41 @@ def get_position_cheats(position, path, grid, max_len):
     return cheats
 
 
+def get_check_cross(max_cheats):
+    cross = set()
+    for x in range(max_cheats + 1):
+        cross.add((x, 0, x))
+        cross.add((-x, 0, x))
+        cross.add((0, x, x))
+        cross.add((0, -x, x))
+        for y in range(max_cheats - x + 1):
+            cross.add((x, y, x + y))
+            cross.add((-x, y, x + y))
+            cross.add((-x, -y, x + y))
+            cross.add((y, x, x + y))
+            cross.add((y, -x, x + y))
+            cross.add((-y, -x, x + y))
+
+    return [x for x in cross if x != (0, 0)]
+
+
+def get_position_cheats_cross(position, path, cross):
+    cheats = {}
+    for add_x, add_y, cheated in cross:
+        new_pos = (position[0] + add_x, position[1] + add_y)
+        if new_pos in path:
+            cheat_key = (position, new_pos)
+            save_seconds = path[position] - path[new_pos] - cheated
+            cheats[cheat_key] = save_seconds
+
+    return cheats
+
+
 def get_cheats(path, grid, max_len=2):
     cheats = {}
+    check_cross = get_check_cross(max_len)
     for position, score in path.items():
-        cheats |= get_position_cheats(position, path, grid, max_len)
+        cheats |= get_position_cheats_cross(position, path, check_cross)
 
     return cheats
 
@@ -111,7 +142,6 @@ def part2(data, save_seconds=100):
     score, path = get_end_path(grid, start, end)
     cheats = get_cheats(path, grid, max_len=20)
 
-    print(len([k for k, v in cheats.items() if v >= save_seconds]))
     return len([k for k, v in cheats.items() if v >= save_seconds])
 
 
@@ -119,7 +149,7 @@ if __name__ == '__main__':
 
     assert part1(test_1.splitlines(), save_seconds=2) == 44
     assert part1(test_1.splitlines(), save_seconds=20) == 5
-    # assert part2(test_1.splitlines(), save_seconds=50) == 285
+    assert part2(test_1.splitlines(), save_seconds=50) == 285
 
     with open('input') as f:
         data = f.read()
