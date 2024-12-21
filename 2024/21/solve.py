@@ -37,16 +37,6 @@ DIRPAD_MAP = {
     '^': {'A': '>A', '<': 'v<A', '>': 'v>A', 'v': 'vA', '^': 'A'}
 }
 
-for k, v in KEYPAD_MAP.items():
-    for k2, v2 in v.items():
-        if not v2.endswith('A'):
-            print(k, k2)
-
-for k, v in DIRPAD_MAP.items():
-    for k2, v2 in v.items():
-        if not v2.endswith('A'):
-            print(k, k2)
-
 
 def get_num_keypad_sequence(code, current='A'):
     if code:
@@ -91,26 +81,19 @@ def get_sequence(code, recursion=2):
     return dir_sequences
 
 
-def part1(data):
+def part1(data, recursion=2):
     codes = parse_data(data)
 
     complexity = 0
     for code in codes:
-        sequences = get_sequence(code)
+        sequences = get_sequence(code, recursion)
         complexity += int("".join([c for c in code if c.isdigit()])) * sum([len(k) * v for k, v in sequences.items()])
 
     return complexity
 
 
 def part2(data):
-    codes = parse_data(data)
-
-    complexity = 0
-    for code in codes:
-        sequences = get_sequence(code, 25)
-        complexity += int("".join([c for c in code if c.isdigit()])) * sum([len(k) * v for k, v in sequences.items()])
-
-    return complexity
+    return part1(data, recursion=25)
 
 
 if __name__ == '__main__':
