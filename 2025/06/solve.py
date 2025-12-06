@@ -27,14 +27,8 @@ def parse_data1(data):
 
 
 def parse_block(block):
-    numbers = []
-    for i in range(0, len(block[0])):
-        number = ""
-        for b in block:
-            number += b[i] if b[i] else ''
-        numbers.append(number)
+    return [int(''.join(b).strip()) for b in zip(*block) if ''.join(b).strip()]
 
-    return [int(n.strip()) for n in numbers if n.strip()]
 
 def parse_data2(data):
     spaces = re.compile("\\s+")
