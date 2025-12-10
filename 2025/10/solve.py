@@ -2,8 +2,7 @@
 import heapq
 
 import numpy as np
-from scipy.optimize import milp, linprog, LinearConstraint
-from z3 import Real, Solver, Int
+from scipy.optimize import milp, LinearConstraint
 
 test_1 = """[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
 [...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}
@@ -36,6 +35,7 @@ def full_buttons(buttons, joltages):
             joltage_button[j] = 1 if i in b else 0
         complete_buttons.append(joltage_button)
     return complete_buttons
+
 
 def press_buttons_joltages(machine):
     buttons = machine[1]
